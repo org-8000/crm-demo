@@ -15,6 +15,22 @@ from __future__ import annotations
 import os
 
 
+def _default_model():
+    """按环境变量构造默认 LLM；未配置 key 时返回 None（仅装配骨架，运行时再配）。"""
+    try:
+        if os.getenv("OPENAI_API_KEY"):
+            from agno.models.openai import OpenAIChat
+
+            return OpenAIChat(id=os.getenv("MIP_MODEL", "gpt-4o-mini"))
+        if os.getenv("ANTHROPIC_API_KEY"):
+            from agno.models.anthropic import Claude
+
+            return Claude(id=os.getenv("MIP_MODEL", "claude-3-5-sonnet-latest"))
+    except Exception:  # noqa: BLE001 - 缺少模型 SDK 时不阻塞装配
+        return None
+    return None
+
+
 def build_agent_os():
     """构建并返回 (agent_os, fastapi_app)。"""
     from agno.db.postgres import PostgresDb
@@ -25,12 +41,16 @@ def build_agent_os():
     )
     db = PostgresDb(db_url=db_url)
 
-    # P1+ 在此注入模块化 Team/Workflow：
-    #   from modules import m5_compliance, m3_profile
-    #   teams=[m3_profile.build_team(...)]; workflows=[m5_compliance.build_workflow(...)]
+    # 注册 P1 模块：⑤ 合规准入（Workflow，无需 LLM，始终装配）
+    #                ③ 客户研判（Team，需 LLM；未配置 key 时跳过，避免构建失败）
+    from modules import m3_profile, m5_compliance
+
     agents: list = []
+    workflows: list = [m5_compliance.build_workflow()]
     teams: list = []
-    workflows: list = []
+    model = _default_model()
+    if model is not None:
+        teams.append(m3_profile.build_team(model=model))
 
     agent_os = AgentOS(
         name="market-intelligence-platform",
