@@ -48,6 +48,7 @@ class ProfileVerdict(BaseVerdict):
     business_focus: list[str] = Field(default_factory=list)
     entry_points: list[EntryPoint] = Field(default_factory=list)
     risks: list[str] = Field(default_factory=list)
+    contacts: list[dict] = Field(default_factory=list, description="联系人(来自合规富化, 含 pii_ttl)")
     fit_score: float = Field(ge=0.0, le=1.0, default=0.0)
 
 

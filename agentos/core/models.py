@@ -46,6 +46,7 @@ class SourceType(str, Enum):
     DOC = "doc"
     LINKEDIN = "linkedin"
     SEARCH = "search"
+    ENRICH = "enrich"  # 合规付费富化 API（如 Proxycurl），🟢
 
 
 class InsightStatus(str, Enum):

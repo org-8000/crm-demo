@@ -42,10 +42,12 @@ class ProfileEngine:
         registry: AdapterRegistry,
         knowledge: KnowledgeBase | None = None,
         pipeline: ExtractionPipeline | None = None,
+        enrich=None,
     ):
         self.registry = registry
         self.knowledge = knowledge
         self.pipeline = pipeline or ExtractionPipeline()
+        self.enrich = enrich  # ProxycurlEnrichAdapter | None
 
     def research(
         self,
@@ -86,6 +88,9 @@ class ProfileEngine:
             + f"：识别到 {len(business_focus)} 类支付业务聚焦{profile_extra}"
         )
 
+        # 可选：合规富化联系人（Proxycurl，🟢），PII 落 TTL
+        contacts = self._enrich_contacts(homepage_url)
+
         verdict = ProfileVerdict(
             subject=name + (f"（{country}）" if country else ""),
             confidence=confidence,
@@ -94,6 +99,7 @@ class ProfileEngine:
             business_focus=business_focus,
             entry_points=entry_points,
             risks=[f"页面出现风险关键词：{r}" for r in risks],
+            contacts=contacts,
             fit_score=fit_score,
         )
 
@@ -108,6 +114,21 @@ class ProfileEngine:
         # 串联上下文放入 chain_context（不进 verdict，不泄漏到前端卡片）
         insight.chain_context = {"country": country, "business_mode": business_mode}
         return insight
+
+    def _enrich_contacts(self, target: str) -> list[dict]:
+        """经合规富化适配器取联系人，并给每条 PII 打上留存到期时间。"""
+        if not self.enrich:
+            return []
+        from core.compliance import pii_expiry
+        from core.tools.enrich import parse_contacts
+
+        doc = self.enrich.fetch(target)
+        contacts = parse_contacts(doc)
+        ttl = pii_expiry().isoformat()
+        for c in contacts:
+            c["pii_ttl"] = ttl
+            c["legal_basis"] = doc.legal_basis
+        return contacts
 
 
 def country_for_compliance(profile_insight: Insight) -> str | None:

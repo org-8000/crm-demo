@@ -10,7 +10,7 @@
 
 from __future__ import annotations
 
-from core.knowledge.kb import KB_PAYMENT_ONTOLOGY, KnowledgeBase
+from core.knowledge.kb import KB_PAYMENT_ONTOLOGY, KBChunk, KnowledgeBase
 from core.models import Evidence, Insight, SourceType
 from core.verdicts import AdmissionItem, AdmissionVerdict
 
@@ -99,8 +99,71 @@ def _readiness_summary(country: str, mode: str, blockers: list[str]) -> str:
     return f"{country}（{mode}）：就绪度中等，主要卡点 = {'、'.join(blockers)}。"
 
 
-# ---------------- Agno Workflow 装配（serve 环境）----------------
+def ingest_regulator_page(
+    registry,
+    knowledge: KnowledgeBase,
+    country: str,
+    url: str,
+    category: str,
+    title: str,
+    severity: str = "warn",
+    parser=None,
+) -> KBChunk:
+    """从监管活页抽取本体并入库（⑤ 监管拓展路径 / Docling 解析）。
 
+    registry: AdapterRegistry（用 REGULATOR 适配器抓取）
+    parser: DocumentParser（默认基础 HTML 解析）
+    返回写入知识库的 KBChunk。
+    """
+    from core.extract.documents import get_parser
+
+    parser = parser or get_parser()
+    doc = registry.fetch(SourceType.REGULATOR, url, legal_basis="public regulator")
+    text = parser.to_text(doc.content, doc.raw_meta.get("content_type", "text/html"))
+    detail = text[:400] if text else title
+    chunk = KBChunk(
+        kb_name=KB_PAYMENT_ONTOLOGY,
+        content=f"{country} | {category} | {title} | {detail}",
+        source_ref={
+            "country": country,
+            "category": category,
+            "title": title,
+            "detail": detail,
+            "severity": severity,
+            "source_url": url,
+        },
+    )
+    knowledge.add(chunk)
+    return chunk
+
+
+def run_subscriptions(
+    knowledge: KnowledgeBase,
+    countries: list[str],
+    business_mode: str = "cross-border acquiring",
+    repo=None,
+    notify=None,
+) -> list[Insight]:
+    """⑤ 监管变更订阅：对订阅国家批量出准入清单，落库并通知。
+
+    设计为可被 AgentOS scheduler / 外部 cron 定时调用（7×24）。
+    """
+    engine = ComplianceEngine(knowledge=knowledge)
+    out: list[Insight] = []
+    for country in countries:
+        try:
+            ins = engine.assess(country, business_mode)
+        except ValueError:
+            continue
+        if repo is not None:
+            repo.save(ins)
+        if notify is not None:
+            notify(ins)
+        out.append(ins)
+    return out
+
+
+# ---------------- Agno Workflow 装配（serve 环境）----------------
 def build_workflow(model=None):  # pragma: no cover - 需 serve 依赖
     """将合规准入包成 Agno Workflow。model 为 LLM（用于润色摘要，可选）。"""
     from agno.workflow import Step, Workflow

@@ -1,10 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // AgentOS 后端地址（BFF 通过此变量代理，前端不直连 LLM）
-  env: {
-    AGENTOS_BASE_URL: process.env.AGENTOS_BASE_URL || "http://localhost:8000",
-  },
+  // 注意：不要在此 inline AGENTOS_BASE_URL / OS_SECURITY_KEY。
+  // 它们是"服务端运行时"变量，由 BFF 路由处理器在运行时读取 process.env，
+  // 放进 next.config 的 env 会在 build 期固化，导致运行时改环境变量无效。
 };
 
 export default nextConfig;
