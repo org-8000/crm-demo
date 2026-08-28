@@ -1,0 +1,45 @@
+[project]
+name = "mip-agentos"
+version = "0.1.0"
+description = "市场智能情报与获客平台 — AgentOS 后端（Agno + FastAPI + Postgres/pgvector）"
+requires-python = ">=3.11"
+dependencies = [
+    "pydantic>=2.6",
+]
+
+# 运行完整 AgentOS 服务时安装（LLM/DB/抓取等），核心 SDK 与单测不依赖这些
+[project.optional-dependencies]
+serve = [
+    "agno>=3.0,<4",
+    "fastapi>=0.115",
+    "uvicorn>=0.30",
+    "sqlalchemy>=2.0",
+    "psycopg[binary]>=3.1",
+    "pgvector>=0.3",
+    "python-dotenv>=1.0",
+    "python-multipart>=0.0.9",
+]
+dev = [
+    "pytest>=8.0",
+    "ruff>=0.6",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# UP042: 保留 `str, Enum` 写法（与 pydantic 兼容、避免 StrEnum 行为差异）
+ignore = ["E501", "UP042"]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["core", "modules", "app"]

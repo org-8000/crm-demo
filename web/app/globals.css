@@ -1,0 +1,44 @@
+:root {
+  --green: #16a34a;
+  --yellow: #e0a800;
+  --red: #dc2626;
+  --border: #e5e7eb;
+  --bg: #f8fafc;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: system-ui, -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; color: #111; background: var(--bg); }
+.app { display: flex; min-height: 100vh; }
+.sidebar { width: 220px; background: #0f172a; color: #e2e8f0; padding: 16px 0; }
+.brand { font-weight: 700; padding: 8px 16px 16px; border-bottom: 1px solid #1e293b; }
+.sidebar nav { display: flex; flex-direction: column; margin-top: 8px; }
+.nav-item { color: #cbd5e1; text-decoration: none; padding: 10px 16px; display: flex; align-items: center; gap: 6px; }
+.nav-item:hover { background: #1e293b; color: #fff; }
+.risk-dot { font-size: 10px; }
+.content { flex: 1; padding: 24px 32px; max-width: 1100px; }
+h1 { font-size: 22px; } h2 { font-size: 17px; margin-top: 28px; }
+
+.metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; }
+.metric { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; text-align: center; }
+.metric b { display: block; font-size: 24px; } .metric span { color: #64748b; font-size: 13px; }
+
+.insight-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 14px; }
+.insight-card { background: #fff; border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+.insight-card__head { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: #64748b; gap: 8px; }
+.insight-card__subject { margin: 8px 0; font-size: 16px; }
+.tag { background: #eef2ff; color: #4338ca; border-radius: 6px; padding: 1px 8px; }
+.verdict-row { display: flex; gap: 8px; font-size: 13px; padding: 2px 0; }
+.verdict-key { color: #64748b; min-width: 130px; }
+.verdict-val { flex: 1; }
+.insight-card__risk { color: var(--red); font-size: 13px; }
+.insight-card__evidence { font-size: 12px; margin-top: 8px; }
+.insight-card__evidence a { color: #2563eb; margin-right: 6px; text-decoration: none; }
+.insight-card__actions { display: flex; gap: 12px; margin-top: 10px; font-size: 12px; color: #64748b; }
+.needs-human { color: var(--yellow); font-weight: 600; }
+
+.review-queue { list-style: none; padding: 0; }
+.review-item { background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+.review-item__meta { display: flex; gap: 12px; align-items: center; }
+.review-item__actions { margin-top: 8px; display: flex; gap: 8px; }
+.review-item__actions button { border: 1px solid var(--border); background: #f1f5f9; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
+.empty { color: #64748b; }
+.placeholder { color: #64748b; background: #fff; border: 1px dashed var(--border); border-radius: 10px; padding: 24px; }
