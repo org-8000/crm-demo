@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime
 from enum import Enum
-from typing import Any
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -100,8 +100,8 @@ class Insight(BaseModel):
     linked_org_id: int | None = None
     created_at: datetime = Field(default_factory=_now)
 
-    # 低置信阈值：低于此值默认需要人工复核
-    LOW_CONFIDENCE_THRESHOLD: float = 0.6
+    # 低置信阈值：低于此值默认需要人工复核（ClassVar，非模型字段，不进入 model_dump）
+    LOW_CONFIDENCE_THRESHOLD: ClassVar[float] = 0.6
 
     @field_validator("evidence")
     @classmethod

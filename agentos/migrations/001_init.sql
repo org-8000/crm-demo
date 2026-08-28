@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS insight (
   evidence    JSONB,                 -- Evidence[]
   needs_human BOOLEAN DEFAULT false,
   status      TEXT DEFAULT 'new',    -- new|reviewed|actioned|dismissed
-  linked_org  BIGINT REFERENCES org(id) ON DELETE SET NULL,
+  linked_org_id BIGINT REFERENCES org(id) ON DELETE SET NULL,
   created_at  TIMESTAMPTZ DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_insight_module_status ON insight (module, status, created_at DESC);

@@ -33,6 +33,13 @@ def test_finalize_high_confidence_no_human():
     assert ins.needs_human is False
 
 
+def test_threshold_is_classvar_not_field():
+    # LOW_CONFIDENCE_THRESHOLD 应为 ClassVar，不进入字段/序列化，且不可被构造覆盖
+    ins = Insight(module=ModuleId.M3_PROFILE, subject="Acme", confidence=0.9, evidence=[_ev()])
+    assert "LOW_CONFIDENCE_THRESHOLD" not in ins.model_dump()
+    assert "LOW_CONFIDENCE_THRESHOLD" not in Insight.model_fields
+
+
 def test_profile_verdict_to_insight():
     v = ProfileVerdict(
         subject="Acme Payments",

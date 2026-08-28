@@ -100,5 +100,5 @@ def _host(url: str) -> str:
 
     try:
         return (urlparse(url).hostname or "").lower()
-    except Exception:
+    except ValueError:
         return ""

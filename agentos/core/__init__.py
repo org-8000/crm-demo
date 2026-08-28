@@ -9,6 +9,7 @@ from core.models import (
     ModuleId,
     SourceType,
 )
+from core.verdicts import AdmissionVerdict, BaseVerdict, ProfileVerdict
 
 __all__ = [
     "ComplianceLevel",
@@ -18,4 +19,7 @@ __all__ = [
     "InsightStatus",
     "ModuleId",
     "SourceType",
+    "BaseVerdict",
+    "ProfileVerdict",
+    "AdmissionVerdict",
 ]

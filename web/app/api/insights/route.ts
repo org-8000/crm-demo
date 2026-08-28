@@ -17,12 +17,16 @@ export async function GET(request: Request) {
     if (res.ok) {
       return NextResponse.json(await res.json());
     }
+    // 上游返回错误（如 401/500）：透传状态，不用示例数据掩盖问题
+    return NextResponse.json(
+      { error: `AgentOS 返回 ${res.status}` },
+      { status: res.status },
+    );
   } catch {
-    // 后端未就绪：回退示例数据
+    // 后端不可达（网络错误）：P0 骨架回退到示例数据以便前端可渲染
+    const data = module
+      ? SAMPLE_INSIGHTS.filter((i) => i.module === module)
+      : SAMPLE_INSIGHTS;
+    return NextResponse.json(data, { headers: { "x-data-source": "sample-fallback" } });
   }
-
-  const data = module
-    ? SAMPLE_INSIGHTS.filter((i) => i.module === module)
-    : SAMPLE_INSIGHTS;
-  return NextResponse.json(data);
 }
