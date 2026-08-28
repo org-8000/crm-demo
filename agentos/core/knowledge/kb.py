@@ -33,7 +33,7 @@ class KnowledgeBase(Protocol):
 class InMemoryKnowledgeBase:
     """离线测试用知识库：基于词重叠的朴素检索（非向量，仅用于冒烟）。
 
-    生产环境用 Agno Knowledge + PgVector（混合检索），接口保持一致。
+    生产环境用 Agno Knowledge + PgVector（混合检索 / 余弦相似），接口保持一致。
     """
 
     def __init__(self) -> None:

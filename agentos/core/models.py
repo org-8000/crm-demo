@@ -98,6 +98,8 @@ class Insight(BaseModel):
     needs_human: bool = False
     status: InsightStatus = InsightStatus.NEW
     linked_org_id: int | None = None
+    # 跨模块串联上下文（如国家/业务模式），不参与前端 verdict 渲染，避免泄漏到卡片
+    chain_context: dict[str, Any] = Field(default_factory=dict)
     created_at: datetime = Field(default_factory=_now)
 
     # 低置信阈值：低于此值默认需要人工复核（ClassVar，非模型字段，不进入 model_dump）

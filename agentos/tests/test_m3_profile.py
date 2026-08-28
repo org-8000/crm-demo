@@ -79,3 +79,13 @@ def test_chain_profile_to_compliance():
     admission = c_eng.assess(country, "cross-border acquiring")
     assert admission.verdict["country"] == "Singapore"
     assert admission.verdict["licenses"]
+
+
+def test_chain_context_not_leaked_into_verdict():
+    """串联上下文应在 chain_context，不得泄漏进 verdict（前端只渲染 verdict）。"""
+    eng = ProfileEngine(registry=_registry(_TEXT))
+    ins = eng.research("Acme", "https://acme.example.com", country="Singapore",
+                       business_mode="cross-border acquiring")
+    assert "_country" not in ins.verdict and "_business_mode" not in ins.verdict
+    assert ins.chain_context["country"] == "Singapore"
+    assert ins.chain_context["business_mode"] == "cross-border acquiring"

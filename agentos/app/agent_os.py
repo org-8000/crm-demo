@@ -69,6 +69,9 @@ def build_agent_os():
 # uvicorn app.agent_os:app 需要模块级 app。延迟到导入时构建。
 try:  # pragma: no cover - 仅在 serve 环境可用
     _agent_os, app = build_agent_os()
-except Exception:  # noqa: BLE001 - 缺少 serve 依赖或 DB 时不阻塞导入分析
+except Exception as _e:  # noqa: BLE001 - 缺少 serve 依赖或 DB 时不阻塞导入分析
+    import logging
+
+    logging.getLogger(__name__).warning("AgentOS 未在导入期构建（缺少 serve 依赖或 DB）：%s", _e)
     _agent_os = None
     app = None

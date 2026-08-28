@@ -105,15 +105,19 @@ class ProfileEngine:
             )
         ]
         insight = verdict.to_insight(evidence=evidence)
-        # 记录国家于 verdict，供串联⑤
-        insight.verdict["_country"] = country
-        insight.verdict["_business_mode"] = business_mode
+        # 串联上下文放入 chain_context（不进 verdict，不泄漏到前端卡片）
+        insight.chain_context = {"country": country, "business_mode": business_mode}
         return insight
 
 
 def country_for_compliance(profile_insight: Insight) -> str | None:
     """从③研判 Insight 抽取国家，用于串联⑤合规准入。"""
-    return profile_insight.verdict.get("_country")
+    return profile_insight.chain_context.get("country")
+
+
+def business_mode_for_compliance(profile_insight: Insight) -> str | None:
+    """从③研判 Insight 抽取业务模式，用于串联⑤合规准入。"""
+    return profile_insight.chain_context.get("business_mode")
 
 
 def _snippet(text: str, n: int = 160) -> str:

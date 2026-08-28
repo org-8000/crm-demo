@@ -30,6 +30,8 @@ class ComplianceEngine:
         self.knowledge = knowledge
 
     def assess(self, country: str, business_mode: str) -> Insight:
+        if not country or not str(country).strip():
+            raise ValueError("country 不能为空")
         # 检索该国相关本体（宽召回后按 country 精确过滤）
         hits = self.knowledge.search(
             KB_PAYMENT_ONTOLOGY, f"{country} {business_mode}", top_k=50
@@ -59,8 +61,14 @@ class ComplianceEngine:
                 )
             )
 
+        # 无证据不出 Insight（合规/反幻觉）：前置于构造 verdict
+        if not evidence:
+            raise ValueError(f"知识库中无 {country} 的合规准入数据，请先补充监管本体")
+
         filled = sum(1 for items in buckets.values() if items)
-        confidence = round(filled / len(_CATEGORY_FIELD), 2)  # 四类覆盖度作为置信度
+        # 注意：confidence 语义 = 四类(牌照/报文/数据/限制)覆盖度，衡量"清单完整性"，
+        # 非"结论确定性"。四类齐全国家恒为 1.0（不会触发 needs_human）。
+        confidence = round(filled / len(_CATEGORY_FIELD), 2)
         blockers = [
             it.title
             for items in buckets.values()
@@ -81,10 +89,6 @@ class ComplianceEngine:
             business_restrictions=buckets["business_restrictions"],
             readiness_summary=summary,
         )
-
-        if not evidence:
-            # 无证据不出 Insight（合规/反幻觉）：以最小占位说明
-            raise ValueError(f"知识库中无 {country} 的合规准入数据，请先补充监管本体")
 
         return verdict.to_insight(evidence=evidence)
 

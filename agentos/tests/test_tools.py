@@ -46,3 +46,19 @@ def test_regulator_adapter_source_type():
     doc = reg.fetch(SourceType.REGULATOR, "https://mas.gov.sg", legal_basis="public regulator")
     assert doc.source_type is SourceType.REGULATOR
     assert doc.legal_basis == "public regulator"
+
+
+def test_ssrf_guard_rejects_non_http():
+    from core.tools.web import _assert_safe_url
+
+    for bad in ["file:///etc/passwd", "ftp://x/y", "gopher://x"]:
+        with pytest.raises(ValueError):
+            _assert_safe_url(bad)
+
+
+def test_ssrf_guard_rejects_private_and_loopback():
+    from core.tools.web import _assert_safe_url
+
+    for bad in ["http://127.0.0.1/x", "http://localhost/x", "http://169.254.169.254/latest/meta-data"]:
+        with pytest.raises(ValueError):
+            _assert_safe_url(bad)

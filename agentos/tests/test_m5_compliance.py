@@ -55,3 +55,9 @@ def test_unknown_country_raises(kb):
     eng = ComplianceEngine(knowledge=kb)
     with pytest.raises(ValueError):
         eng.assess("Atlantis", "acquiring")
+
+
+def test_empty_country_raises(kb):
+    eng = ComplianceEngine(knowledge=kb)
+    with pytest.raises(ValueError):
+        eng.assess("", "acquiring")

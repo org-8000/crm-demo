@@ -14,7 +14,11 @@ import sys
 from core.knowledge.kb import InMemoryKnowledgeBase
 from core.models import SourceType
 from core.tools.base import AdapterRegistry, RawDocument
-from modules.m3_profile import ProfileEngine, country_for_compliance
+from modules.m3_profile import (
+    ProfileEngine,
+    business_mode_for_compliance,
+    country_for_compliance,
+)
 from modules.m5_compliance import ComplianceEngine
 from modules.seeds import seed_payment_ontology
 
@@ -62,8 +66,9 @@ def run_demo(live: bool = False) -> dict:
 
     # 串联 → ⑤ 合规准入
     country = country_for_compliance(profile)
+    business_mode = business_mode_for_compliance(profile) or "cross-border acquiring"
     compliance_engine = ComplianceEngine(knowledge=kb)
-    admission = compliance_engine.assess(country, "cross-border acquiring")
+    admission = compliance_engine.assess(country, business_mode)
 
     return {
         "profile": profile.model_dump(mode="json"),
