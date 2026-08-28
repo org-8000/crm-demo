@@ -22,6 +22,7 @@ SOURCE_LEVEL: dict[SourceType, ComplianceLevel] = {
     SourceType.REGULATOR: ComplianceLevel.GREEN,
     SourceType.DOC: ComplianceLevel.GREEN,
     SourceType.SEARCH: ComplianceLevel.GREEN,
+    SourceType.ENRICH: ComplianceLevel.GREEN,  # 合规付费富化 API（付费换合规）
     SourceType.SOCIAL: ComplianceLevel.YELLOW,
     SourceType.GROUP: ComplianceLevel.RED,
     SourceType.LINKEDIN: ComplianceLevel.RED,

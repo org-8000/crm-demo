@@ -29,6 +29,7 @@ export interface Insight {
   needs_human: boolean;
   status: InsightStatus;
   linked_org_id?: number | null;
+  chain_context?: Record<string, unknown>;
   created_at: string;
 }
 

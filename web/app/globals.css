@@ -42,3 +42,18 @@ h1 { font-size: 22px; } h2 { font-size: 17px; margin-top: 28px; }
 .review-item__actions button { border: 1px solid var(--border); background: #f1f5f9; border-radius: 6px; padding: 4px 10px; cursor: pointer; }
 .empty { color: #64748b; }
 .placeholder { color: #64748b; background: #fff; border: 1px dashed var(--border); border-radius: 10px; padding: 24px; }
+
+/* 交互面板 */
+.run-form { display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end; background: #fff; border: 1px solid var(--border); border-radius: 10px; padding: 14px; margin: 12px 0; }
+.run-form label { display: flex; flex-direction: column; font-size: 12px; color: #64748b; gap: 4px; }
+.run-form input { border: 1px solid var(--border); border-radius: 6px; padding: 6px 8px; min-width: 200px; }
+.run-form button { background: #4338ca; color: #fff; border: none; border-radius: 6px; padding: 8px 16px; cursor: pointer; }
+.run-form button:disabled { opacity: .6; cursor: default; }
+.steps { list-style: none; padding: 0; display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
+.step { font-size: 12px; color: #94a3b8; } .step.done { color: var(--green); }
+.error { color: var(--red); }
+.hint { color: #4338ca; font-size: 13px; }
+.evidence { display: inline-block; margin-right: 8px; }
+.evidence summary { color: #2563eb; cursor: pointer; }
+.evidence__body { background: #f8fafc; border: 1px solid var(--border); border-radius: 6px; padding: 8px; margin-top: 4px; font-size: 12px; }
+.evidence__body a { word-break: break-all; }

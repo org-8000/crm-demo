@@ -63,6 +63,29 @@ def build_agent_os():
         auto_provision_dbs=os.getenv("AUTO_PROVISION_DBS", "true").lower() == "true",
     )
     app = agent_os.get_app()
+
+    # 挂载自定义业务 API（/insights、/m3/research、/m5/assess、/review、接管处理）
+    try:
+        from app.api import build_api_router
+        from app.db import SqlInsightRepo
+        from app.runtime import get_knowledge, get_registry
+        from core.notify import notify_insight
+        from core.tools.enrich import ProxycurlEnrichAdapter
+
+        repo = SqlInsightRepo(db_url=os.getenv("BIZ_DB_URL", db_url))
+        router = build_api_router(
+            repo=repo,
+            knowledge=get_knowledge(),
+            registry=get_registry(),
+            enrich=ProxycurlEnrichAdapter(),
+            notify=notify_insight,
+        )
+        app.include_router(router)
+    except Exception as _api_e:  # noqa: BLE001
+        import logging
+
+        logging.getLogger(__name__).warning("自定义 API 未挂载：%s", _api_e)
+
     return agent_os, app
 
 

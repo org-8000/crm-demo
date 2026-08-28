@@ -16,10 +16,10 @@ jobs:
       - uses: astral-sh/setup-uv@v3
       - name: Set up Python
         run: uv venv --python 3.13
-      - name: Install (core + dev)
-        run: uv pip install pydantic pytest ruff
+      - name: Install (serve + dev, 跑全量测试)
+        run: uv pip install -e '.[serve,dev]'
       - name: Ruff
-        run: uv run ruff check core modules app tests
+        run: uv run ruff check core modules app scripts tests
       - name: Pytest
         run: uv run pytest -q
 

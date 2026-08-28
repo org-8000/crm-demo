@@ -63,9 +63,13 @@ export function InsightCard({ insight }: { insight: Insight }) {
       <section className="insight-card__evidence">
         <strong>证据链：</strong>
         {insight.evidence.map((e, i) => (
-          <a key={i} href={e.source_url} target="_blank" rel="noreferrer" title={e.snippet}>
-            [{e.source_type}]
-          </a>
+          <details key={i} className="evidence">
+            <summary>[{e.source_type}]</summary>
+            <div className="evidence__body">
+              <a href={e.source_url} target="_blank" rel="noreferrer">{e.source_url}</a>
+              <p>{e.snippet}</p>
+            </div>
+          </details>
         ))}
       </section>
 

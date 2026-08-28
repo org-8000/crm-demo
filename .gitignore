@@ -19,5 +19,11 @@ npm-debug.log*
 .env.local
 *.local
 
+# Local dev DB
+*.db
+
 # OS
 .DS_Store
+
+# TS build info
+*.tsbuildinfo

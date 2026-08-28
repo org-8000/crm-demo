@@ -1,6 +1,5 @@
-import type { Insight } from "./types";
-
-// BFF 基础地址：前端调用自身 /api/*，由 Next 服务端代理到 AgentOS（注入 OS_SECURITY_KEY）
+// 仅在服务端（BFF 路由处理器）使用：读取后端地址与密钥，代理到 AgentOS。
+// 不要在客户端组件里导入本模块（含服务端环境变量）。
 const AGENTOS_BASE_URL =
   process.env.AGENTOS_BASE_URL || "http://localhost:8000";
 const OS_SECURITY_KEY = process.env.OS_SECURITY_KEY || "";
@@ -13,12 +12,4 @@ export function agentosHeaders(): HeadersInit {
 
 export function agentosUrl(path: string): string {
   return `${AGENTOS_BASE_URL}${path.startsWith("/") ? path : `/${path}`}`;
-}
-
-// 客户端从 BFF 拉取洞察
-export async function fetchInsights(module?: string): Promise<Insight[]> {
-  const qs = module ? `?module=${encodeURIComponent(module)}` : "";
-  const res = await fetch(`/api/insights${qs}`, { cache: "no-store" });
-  if (!res.ok) throw new Error(`加载洞察失败：${res.status}`);
-  return res.json();
 }
