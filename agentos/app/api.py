@@ -71,7 +71,10 @@ def build_api_router(repo, knowledge=None, registry=None, enrich=None, notify=No
         if compliance is None:
             raise HTTPException(status_code=503, detail="知识库未配置")
         steps = ["检索监管本体", "组装准入清单", "生成证据链"]
-        ins = compliance.assess(req.country, req.business_mode)
+        try:
+            ins = compliance.assess(req.country, req.business_mode)
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
         saved = repo.save(ins)
         if notify:
             notify(ins)
@@ -82,9 +85,12 @@ def build_api_router(repo, knowledge=None, registry=None, enrich=None, notify=No
         if profile is None:
             raise HTTPException(status_code=503, detail="采集注册表未配置")
         steps = ["抓取机构主页", "提取业务聚焦/切入点/风险", "生成画像"]
-        ins = profile.research(
-            req.name, req.homepage_url, country=req.country, business_mode=req.business_mode
-        )
+        try:
+            ins = profile.research(
+                req.name, req.homepage_url, country=req.country, business_mode=req.business_mode
+            )
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
         saved = repo.save(ins)
         result: dict[str, Any] = {"insight": saved, "steps": steps}
         # 串联：带出可用于⑤的国家
@@ -104,6 +110,6 @@ def build_api_router(repo, knowledge=None, registry=None, enrich=None, notify=No
         if not updated:
             raise HTTPException(status_code=404, detail="insight 不存在")
         # 反馈写回（learnings 占位：生产写 agno_learnings）
-        return {"insight": updated, "feedback_recorded": bool(req.note)}
+        return {"insight": updated, "note_received": bool(req.note)}
 
     return router

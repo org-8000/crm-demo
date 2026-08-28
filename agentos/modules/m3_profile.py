@@ -120,8 +120,14 @@ class ProfileEngine:
         if not self.enrich:
             return []
         from core.compliance import pii_expiry
+        from core.models import SourceType
         from core.tools.enrich import parse_contacts
 
+        # 统一过合规网关（ENRICH=🟢，保持"任何采集先过闸门"的一致性与审计）
+        url = target if str(target).startswith("http") else None
+        self.registry.gateway.check(
+            SourceType.ENRICH, url=url, legal_basis="proxycurl compliant paid API"
+        )
         doc = self.enrich.fetch(target)
         contacts = parse_contacts(doc)
         ttl = pii_expiry().isoformat()

@@ -11,7 +11,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import UTC, datetime
 from typing import Protocol
 
 from sqlalchemy import JSON, Boolean, DateTime, Float, Integer, String, Text, create_engine, select
@@ -42,6 +42,11 @@ class InsightRow(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
     def to_insight(self) -> Insight:
+        created = self.created_at
+        # SQLite 读回为 naive datetime；统一补 UTC 以与写入侧序列化一致
+        if created is not None and created.tzinfo is None:
+
+            created = created.replace(tzinfo=UTC)
         ins = Insight.model_validate(
             {
                 "module": self.module,
@@ -54,7 +59,7 @@ class InsightRow(Base):
                 "status": self.status,
                 "linked_org_id": self.linked_org_id,
                 "chain_context": self.chain_context or {},
-                "created_at": self.created_at,
+                "created_at": created,
             }
         )
         return ins

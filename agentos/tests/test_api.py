@@ -81,7 +81,7 @@ def test_review_queue_and_action(client):
     r = client.post(f"/insights/{iid}/review", json={"action": "approve", "note": "ok"})
     assert r.status_code == 200
     assert r.json()["insight"]["status"] == "actioned"
-    assert r.json()["feedback_recorded"] is True
+    assert r.json()["note_received"] is True
     # 处理后不再在队列
     assert all(i["id"] != iid for i in client.get("/review").json())
 
@@ -90,6 +90,22 @@ def test_review_unknown_action_400(client):
     client.post("/m5/assess", json={"country": "Singapore", "business_mode": "x"})
     r = client.post("/insights/1/review", json={"action": "bogus"})
     assert r.status_code == 400
+
+
+def test_m5_assess_bad_input_400(client):
+    # 未知国家（知识库无数据）与空国家应为 400，而非 500
+    assert client.post("/m5/assess", json={"country": "Atlantis", "business_mode": "x"}).status_code == 400
+    assert client.post("/m5/assess", json={"country": "", "business_mode": "x"}).status_code == 400
+
+
+def test_created_at_roundtrip_consistent(client):
+    """写入与读回的 created_at 时区一致（SQLite naive → 统一补 UTC）。"""
+    saved = client.post("/m5/assess", json={"country": "Singapore", "business_mode": "x"}).json()
+    iid = saved["insight"]["id"]
+    fetched = client.get(f"/insights/{iid}").json()
+    # 两者都应带时区（以 +00:00 或 Z 结尾），不应一个带一个不带
+    assert saved["insight"]["created_at"][-6:] in ("+00:00",) or saved["insight"]["created_at"].endswith("Z")
+    assert fetched["created_at"][-6:] in ("+00:00",) or fetched["created_at"].endswith("Z")
 
 
 def test_get_missing_insight_404(client):
